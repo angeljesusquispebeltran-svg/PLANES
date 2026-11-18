@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Panel de planes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F2F6F4; --surface:#FFFFFF; --fg:#14201C; --muted:#586964; --line:#D9E3DE;
+  --accent:#0E6B58; --accent-fg:#FFFFFF; --accent-soft:#DCEFE7;
+  --prot:#2D6CDF; --carb:#C77B0A; --fat:#C2406A; --danger:#B3261E;
+  --f-display:'Space Grotesk',system-ui,sans-serif; --f-body:'Inter',system-ui,sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0F1714; --surface:#17221E; --fg:#E6EFEA; --muted:#9AADA5; --line:#263530;
+    --accent:#4CC3A3; --accent-fg:#06241C; --accent-soft:#1B3A31;
+    --prot:#7AA2F7; --carb:#F0B04F; --fat:#E57C9C; --danger:#F2867F;
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);
+  padding-block:20px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+a{color:var(--accent)}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.top>div{min-width:0}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.2}
+h1{font-size:26px;font-weight:700;letter-spacing:-.01em}
+h2{font-size:21px;font-weight:600}
+h3{font-size:17px;font-weight:600}
+p{margin:0}
+.muted{color:var(--muted)}
+.foot{text-align:center;font-size:13px}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:2px}
+button{font:inherit;color:inherit;cursor:pointer}
+.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:inherit;border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 14px;font-weight:500;min-height:42px}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.btn.danger{color:var(--danger)}
+.btn.sm{min-height:34px;padding:4px 12px;font-size:13px}
+.btn.icon{min-height:42px;padding:0;width:36px;color:var(--muted)}
+.btn:disabled{opacity:.55;cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+input,select,textarea{
+  font:inherit;font-size:16px;color:var(--fg);background:var(--surface);
+  border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0;min-height:42px;
+}
+textarea{resize:vertical;min-height:84px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:500;color:var(--muted);min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.err{color:var(--danger);font-size:13px;min-height:1.3em}
+.ok{background:var(--accent-soft);color:var(--fg);border-radius:8px;padding:8px 12px;font-size:14px}
+.steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kcal-live{font-size:13px;color:var(--muted)}
+.kcal-live b{font-family:var(--f-display);font-size:18px;color:var(--fg);font-variant-numeric:tabular-nums}
+.meal{gap:10px}
+.mealhead{display:grid;grid-template-columns:minmax(0,1fr) 112px 36px;gap:8px;align-items:center}
+.item{display:grid;grid-template-columns:minmax(0,1fr) 76px 72px 36px;gap:8px;align-items:center}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.client{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;
+}
+.client:hover{border-color:var(--accent)}
+.client .who{min-width:0}
+.client .who b{display:block;font-family:var(--f-display);font-size:16px;font-weight:600;overflow-wrap:anywhere}
+.client .meta{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.client .kc{font-family:var(--f-display);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.list{display:flex;flex-direction:column;gap:8px}
+.listhead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.kcalrow{display:flex;align-items:baseline;gap:8px}
+.kcal{font-family:var(--f-display);font-size:44px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
+.bar span{display:block;height:100%}
+.legend{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px 12px;font-size:14px}
+.legend li{display:flex;align-items:center;gap:8px;min-width:0}
+.legend i{width:10px;height:10px;border-radius:3px;flex:none}
+.legend b{font-weight:600}
+.mealview header{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.time{font-family:var(--f-display);color:var(--muted);font-variant-numeric:tabular-nums}
+.rows{list-style:none;margin:0;padding:0}
+.rows li{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-top:1px solid var(--line)}
+.rows li:first-child{border-top:0}
+.rows .amt{font-family:var(--f-display);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pre{white-space:pre-wrap;overflow-wrap:anywhere}
+@media (prefers-reduced-motion:no-preference){.btn,.client{transition:border-color .15s}}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+'use strict';
+const ENC=new TextEncoder(),DEC=new TextDecoder();
+const ITER=600000,SALT_DNI=ENC.encode('planes-comida-v2');
+const $=id=>document.getElementById(id);
+function toB64(u8){let s='';for(let i=0;i<u8.length;i++)s+=String.fromCharCode(u8[i]);return btoa(s)}
+function fromB64(s){const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+async function pbkdf2(secret,salt,nbits){
+  const base=await crypto.subtle.importKey('raw',ENC.encode(secret),'PBKDF2',false,['deriveBits']);
+  return new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:salt,iterations:ITER},base,nbits));
+}
+async function deriveDni(dni){
+  const bits=await pbkdf2(dni,SALT_DNI,384);
+  let id='';for(let i=0;i<16;i++)id+=bits[i].toString(16).padStart(2,'0');
+  const key=await crypto.subtle.importKey('raw',bits.slice(16,48),'AES-GCM',false,['encrypt','decrypt']);
+  return {id:id,key:key};
+}
+async function adminKey(pw,salt){
+  const bits=await pbkdf2(pw,salt,256);
+  return crypto.subtle.importKey('raw',bits,'AES-GCM',false,['encrypt','decrypt']);
+}
+async function seal(obj,key){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},key,ENC.encode(JSON.stringify(obj)));
+  return {v:1,iv:toB64(iv),ct:toB64(new Uint8Array(ct))};
+}
+async function unseal(box,key){
+  try{
+    const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:fromB64(box.iv)},key,fromB64(box.ct));
+    return JSON.parse(DEC.decode(pt));
+  }catch(e){return null}
+}
+
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=parseFloat(String(v).replace(',','.'));return Number.isFinite(n)&&n>=0?n:0};
+const fmtN=n=>String(Number((+n||0).toFixed(1)));
+const fmtDate=ts=>ts?new Date(ts).toLocaleDateString('es-PE',{day:'numeric',month:'short',year:'numeric'}):'';
+const kcalOf=p=>Math.round(num(p.p)*4+num(p.c)*4+num(p.g)*9);
+
+function planHTML(p){
+  const kc=kcalOf(p),cp=p.p*4,cc=p.c*4,cg=p.g*9,tot=(cp+cc+cg)||1;
+  const w=x=>(x/tot*100).toFixed(1),pc=x=>Math.round(x/tot*100);
+  let out='<div><h2>'+esc(p.nombre)+'</h2>';
+  if(p.objetivo)out+='<p class="muted">'+esc(p.objetivo)+'</p>';
+  if(p.actualizado)out+='<p class="muted" style="font-size:13px">Actualizado el '+fmtDate(p.actualizado)+'</p>';
+  out+='</div>';
+  if(kc){
+    out+='<div class="panel"><div class="kcalrow"><span class="kcal">'+kc+'</span><span class="muted">kcal al día</span></div>'+
+      '<div class="bar" role="img" aria-label="Reparto de calorías entre proteína, carbohidratos y grasas">'+
+      '<span style="width:'+w(cp)+'%;background:var(--prot)"></span>'+
+      '<span style="width:'+w(cc)+'%;background:var(--carb)"></span>'+
+      '<span style="width:'+w(cg)+'%;background:var(--fat)"></span></div>'+
+      '<ul class="legend">'+
+      '<li><i style="background:var(--prot)"></i><span><b>Proteína</b> '+fmtN(p.p)+' g <span class="muted">'+pc(cp)+'%</span></span></li>'+
+      '<li><i style="background:var(--carb)"></i><span><b>Carbohidratos</b> '+fmtN(p.c)+' g <span class="muted">'+pc(cc)+'%</span></span></li>'+
+      '<li><i style="background:var(--fat)"></i><span><b>Grasas</b> '+fmtN(p.g)+' g <span class="muted">'+pc(cg)+'%</span></span></li>'+
+      '</ul></div>';
+  }
+  (p.comidas||[]).forEach(m=>{
+    out+='<section class="panel mealview"><header><h3>'+esc(m.nombre)+'</h3>'+(m.hora?'<span class="time">'+esc(m.hora)+'</span>':'')+'</header><ul class="rows">'+
+      (m.items||[]).map(i=>'<li><span>'+esc(i.alimento)+'</span><span class="amt">'+fmtN(i.cant)+' '+esc(i.unidad||'g')+'</span></li>').join('')+
+      '</ul></section>';
+  });
+  if(p.notas)out+='<div class="panel"><h3>Indicaciones</h3><p class="pre">'+esc(p.notas)+'</p></div>';
+  return out;
+}
+
+</script>
+<script>
+const S={step:'loading',first:false,adminBox:null,loadErr:'',key:null,salt:null,admin:{clientes:{}},
+  token:'',repo:'',clients:[],mode:'list',draft:null,confirmDel:false,notice:'',connErr:''};
+const LS='planes-gh-v1';
+function readCfg(){try{return JSON.parse(localStorage.getItem(LS)||'{}')}catch(e){return {}}}
+function writeCfg(c){try{localStorage.setItem(LS,JSON.stringify(c))}catch(e){}}
+function detectRepo(){
+  if(!location.hostname.endsWith('.github.io'))return '';
+  const owner=location.hostname.split('.')[0];
+  const seg=location.pathname.split('/').filter(Boolean);
+  const repo=(seg.length&&!/\.html?$/.test(seg[0]))?seg[0]:location.hostname;
+  return owner+'/'+repo;
+}
+
+/*GH-START*/
+function ghUrl(path){return 'https://api.github.com/repos/'+S.repo+'/contents/'+path}
+function ghHeaders(){return {'Authorization':'Bearer '+S.token,'Accept':'application/vnd.github+json'}}
+async function ghGet(path){
+  const r=await fetch(ghUrl(path)+'?t='+Date.now(),{headers:ghHeaders(),cache:'no-store'});
+  if(r.status===404)return null;
+  if(!r.ok)throw {status:r.status};
+  const j=await r.json();
+  return {sha:j.sha,text:DEC.decode(fromB64(String(j.content).replace(/\s/g,'')))};
+}
+async function ghPutReq(path,text,sha,msg){
+  const body={message:msg,content:toB64(ENC.encode(text))};
+  if(sha)body.sha=sha;
+  return fetch(ghUrl(path),{method:'PUT',headers:Object.assign({'Content-Type':'application/json'},ghHeaders()),body:JSON.stringify(body)});
+}
+async function ghWrite(path,makeText,msg){
+  for(let i=0;i<3;i++){
+    const cur=await ghGet(path);
+    const text=makeText(cur?cur.text:null);
+    const r=await ghPutReq(path,text,cur?cur.sha:null,msg);
+    if(r.ok)return;
+    if(r.status===409||r.status===422)continue;
+    throw {status:r.status};
+  }
+  throw {status:409};
+}
+async function persist(nextAdmin,mutate){
+  const box=Object.assign({},await seal(nextAdmin,S.key),{salt:toB64(S.salt)});
+  await ghWrite('admin.json',cur=>{
+    if(S.first&&cur)throw {code:'exists'};
+    return JSON.stringify(box)+'\n';
+  },'Actualizar panel');
+  S.first=false;
+  await ghWrite('planes.json',cur=>{
+    const j=cur?JSON.parse(cur):{v:1,plans:{}};
+    j.plans=j.plans||{};
+    mutate(j.plans);
+    return JSON.stringify(j)+'\n';
+  },'Actualizar planes');
+}
+/*GH-END*/
+
+function ghErr(e){
+  if(e&&e.code==='exists')return 'Ya existe un panel con otra contraseña. Recarga la página e ingresa con tu contraseña.';
+  const s=e&&e.status;
+  if(s===401||s===403||s===404)return 'GitHub no aceptó el token. Revisa que sea de este repositorio y tenga permiso de escritura en “Contents”.';
+  if(s===409||s===422)return 'Hubo un cambio al mismo tiempo. Intenta guardar de nuevo.';
+  return 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.';
+}
+
+const blankItem=()=>({alimento:'',cant:'',unidad:'g'});
+const blankMeal=(n,h)=>({nombre:n||'',hora:h||'',items:[blankItem()]});
+const blankDraft=()=>({origId:null,dni:'',nombre:'',objetivo:'',p:'',c:'',g:'',notas:'',comidas:[blankMeal('Desayuno','08:00')]});
+function draftFrom(c){
+  const pl=c.plan,f=v=>v?String(v):'';
+  const comidas=(pl.comidas||[]).map(m=>({nombre:m.nombre||'',hora:m.hora||'',items:(m.items||[]).map(i=>({alimento:i.alimento||'',cant:f(i.cant),unidad:i.unidad||'g'}))}));
+  return {origId:c.id,dni:c.dni||'',nombre:pl.nombre||'',objetivo:pl.objetivo||'',p:f(pl.p),c:f(pl.c),g:f(pl.g),notas:pl.notas||'',comidas:comidas.length?comidas:[blankMeal('Desayuno','08:00')]};
+}
+function cleanPlan(d){
+  return {
+    nombre:d.nombre.trim(),objetivo:d.objetivo.trim(),notas:d.notas.trim(),
+    p:num(d.p),c:num(d.c),g:num(d.g),
+    comidas:d.comidas.map(m=>({
+      nombre:m.nombre.trim()||'Comida',hora:m.hora||'',
+      items:m.items.filter(i=>i.alimento.trim()).map(i=>({alimento:i.alimento.trim(),cant:num(i.cant),unidad:i.unidad||'g'}))
+    })).filter(m=>m.items.length)
+  };
+}
+function refreshClients(){
+  const c=S.admin.clientes||{};
+  S.clients=Object.keys(c).map(id=>({id:id,dni:c[id].dni,plan:c[id].plan}))
+    .filter(x=>x.plan&&x.plan.nombre)
+    .sort((a,b)=>a.plan.nombre.localeCompare(b.plan.nombre,'es'));
+}
+
+/* ---------- vistas ---------- */
+function shell(inner){return '<div class="wrap">'+inner+'</div>'}
+function topbar(){
+  const acts=S.step==='panel'
+    ?'<a class="btn sm" href="index.html">Ver página del cliente</a><button class="btn sm" data-act="exit">Salir</button>':'';
+  return '<header class="top"><div><div class="eyebrow">Panel del administrador</div><h1>Planes de comida</h1></div><div class="actions">'+acts+'</div></header>';
+}
+function render(){
+  const app=$('app');
+  if(S.step==='loading'){app.innerHTML=shell('<p class="muted">Cargando…</p>');return}
+  const body=S.step==='login'?loginHTML():(S.mode==='edit'?editorHTML():listHTML());
+  app.innerHTML=shell(topbar()+body);
+}
+function loginHTML(){
+  if(S.loadErr)return '<div class="panel"><p>'+esc(S.loadErr)+'</p><div><button class="btn" data-act="exit">Reintentar</button></div></div>';
+  const first=S.first;
+  return '<form id="loginForm" class="panel" autocomplete="on">'+
+    '<h2>¿Eres el administrador?</h2>'+
+    '<p class="muted">'+(first
+      ?'Primera vez: crea tu contraseña de administrador (mínimo 8 caracteres). Elige una larga: la lista de tus clientes se guarda cifrada con ella en un repositorio público.'
+      :'Ingresa tu contraseña para crear y editar planes.')+'</p>'+
+    '<label class="f">Contraseña<input id="pw" type="password" autocomplete="'+(first?'new-password':'current-password')+'"></label>'+
+    (first?'<label class="f">Repite la contraseña<input id="pw2" type="password" autocomplete="new-password"></label>':'')+
+    '<p class="err" id="lerr" role="alert"></p>'+
+    '<div class="actions"><button id="loginBtn" class="btn primary" type="submit">Entrar</button></div></form>';
+}
+function connHTML(){
+  if(S.token&&S.repo)
+    return '<p class="muted" style="font-size:13px">Conectado a GitHub: <b>'+esc(S.repo)+'</b> · <button class="btn sm" data-act="disc-conn">Desconectar</button></p>';
+  return '<div class="panel"><h3>Conecta tu GitHub para poder guardar</h3>'+
+    '<ol class="steps"><li>Abre <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a>.</li>'+
+    '<li>Elige solo este repositorio y, en permisos del repositorio, “Contents: Read and write”.</li>'+
+    '<li>Genera el token, cópialo y pégalo aquí abajo.</li></ol>'+
+    '<label class="f">Repositorio (usuario/nombre)<input id="repoIn" autocapitalize="none" autocomplete="off" value="'+esc(S.repo)+'" placeholder="usuario/planes"></label>'+
+    '<label class="f">Token<input id="tokIn" type="password" autocomplete="off" placeholder="github_pat_…"></label>'+
+    '<p class="err" id="cerr" role="alert">'+esc(S.connErr)+'</p>'+
+    '<div class="actions"><button class="btn primary" data-act="save-conn">Conectar</button></div></div>';
+}
+function listHTML(){
+  let out='';
+  if(S.notice)out+='<p class="ok" role="status">'+esc(S.notice)+'</p>';
+  out+=connHTML();
+  out+='<div class="listhead"><h2>Tus clientes</h2><button class="btn primary" data-act="new">Nuevo plan</button></div>';
+  if(!S.clients.length)out+='<div class="panel"><h3>Aún no cargaste ningún plan</h3><p class="muted">Toca “Nuevo plan”, escribe el DNI de tu cliente, sus macros y las comidas con los gramos de cada alimento.</p></div>';
+  else out+='<div class="list">'+S.clients.map(c=>{
+    const pl=c.plan,kc=kcalOf(pl);
+    return '<button class="client" data-act="edit" data-id="'+esc(c.id)+'"><span class="who"><b>'+esc(pl.nombre)+'</b><span class="meta">DNI '+esc(c.dni)+' · P '+fmtN(pl.p)+' · C '+fmtN(pl.c)+' · G '+fmtN(pl.g)+'</span></span><span class="kc">'+(kc?kc+' kcal':'')+'</span></button>';
+  }).join('')+'</div>';
+  out+='<p class="muted" style="font-size:13px">Cada plan se guarda cifrado con el DNI del cliente. Un cambio tarda 1 o 2 minutos en verse en la página del cliente.</p>';
+  return out;
+}
+function editorHTML(){
+  const d=S.draft;
+  let out='<div class="listhead"><h2>'+(d.origId?'Editar plan':'Nuevo plan')+'</h2><button class="btn sm" data-act="back">← Clientes</button></div>';
+  out+='<div class="panel"><div class="row2">'+
+    '<label class="f">DNI del cliente<input data-k="dni" inputmode="numeric" maxlength="8" placeholder="8 dígitos" value="'+esc(d.dni)+'"></label>'+
+    '<label class="f">Nombre<input data-k="nombre" placeholder="Nombre y apellido" value="'+esc(d.nombre)+'"></label></div>'+
+    '<label class="f">Objetivo<input data-k="objetivo" placeholder="Ej. Pérdida de grasa, 12 semanas" value="'+esc(d.objetivo)+'"></label></div>';
+  out+='<div class="panel"><h3>Macros diarios</h3><div class="row3">'+
+    '<label class="f">Proteína (g)<input data-k="p" inputmode="decimal" placeholder="150" value="'+esc(d.p)+'"></label>'+
+    '<label class="f">Carbohidratos (g)<input data-k="c" inputmode="decimal" placeholder="220" value="'+esc(d.c)+'"></label>'+
+    '<label class="f">Grasas (g)<input data-k="g" inputmode="decimal" placeholder="60" value="'+esc(d.g)+'"></label></div>'+
+    '<p class="kcal-live"><b id="kcalLive">'+kcalOf(d)+'</b> kcal al día (proteína y carbohidratos ×4, grasas ×9)</p></div>';
+  out+='<datalist id="mealnames"><option value="Desayuno"><option value="Media mañana"><option value="Almuerzo"><option value="Media tarde"><option value="Cena"></datalist>';
+  d.comidas.forEach((m,mi)=>{
+    out+='<section class="panel meal"><div class="mealhead">'+
+      '<input list="mealnames" data-m="'+mi+'" data-k="mnombre" placeholder="Comida" aria-label="Nombre de la comida" value="'+esc(m.nombre)+'">'+
+      '<input type="time" data-m="'+mi+'" data-k="mhora" aria-label="Hora" value="'+esc(m.hora)+'">'+
+      '<button class="btn icon" data-act="del-meal" data-m="'+mi+'" aria-label="Quitar comida">×</button></div>';
+    m.items.forEach((it,ii)=>{
+      out+='<div class="item">'+
+        '<input data-m="'+mi+'" data-i="'+ii+'" data-k="alimento" placeholder="Ej. Pechuga de pollo" aria-label="Alimento" value="'+esc(it.alimento)+'">'+
+        '<input data-m="'+mi+'" data-i="'+ii+'" data-k="cant" inputmode="decimal" placeholder="150" aria-label="Cantidad" value="'+esc(it.cant)+'">'+
+        '<select data-m="'+mi+'" data-i="'+ii+'" data-k="unidad" aria-label="Unidad">'+
+          ['g','ml','unid'].map(u=>'<option value="'+u+'"'+(it.unidad===u?' selected':'')+'>'+u+'</option>').join('')+'</select>'+
+        '<button class="btn icon" data-act="del-item" data-m="'+mi+'" data-i="'+ii+'" aria-label="Quitar alimento">×</button></div>';
+    });
+    out+='<div><button class="btn sm" data-act="add-item" data-m="'+mi+'">+ Alimento</button></div></section>';
+  });
+  out+='<div><button class="btn" data-act="add-meal">+ Agregar comida</button></div>';
+  out+='<div class="panel"><label class="f">Indicaciones para el cliente<textarea data-k="notas" placeholder="Hidratación, suplementos, horarios, intercambios permitidos…">'+esc(d.notas)+'</textarea></label></div>';
+  out+='<p class="err" id="status" role="alert"></p>';
+  out+='<div class="actions"><button id="saveBtn" class="btn primary" data-act="save">Guardar plan</button><button class="btn" data-act="back">Cancelar</button>'+
+    (d.origId?'<button id="delBtn" class="btn danger" data-act="del-client">Eliminar cliente</button>':'')+'</div>';
+  return out;
+}
+
+/* ---------- acciones ---------- */
+function setStatus(t){const el=$('status');if(el)el.textContent=t||''}
+function validate(d){
+  if(!/^\d{8}$/.test(d.dni))return 'El DNI debe tener 8 dígitos.';
+  if(!d.nombre.trim())return 'Escribe el nombre del cliente.';
+  if(!cleanPlan(d).comidas.length)return 'Agrega al menos una comida con un alimento.';
+  return '';
+}
+function flash(t){
+  S.notice=t;render();
+  setTimeout(()=>{S.notice='';if(S.step==='panel'&&S.mode==='list')render()},6000);
+}
+function needConn(){
+  if(S.token&&S.repo)return false;
+  setStatus('Primero conecta tu GitHub (en la lista de clientes) para poder guardar.');
+  return true;
+}
+async function savePlan(){
+  const d=S.draft,msg=validate(d);
+  if(msg){setStatus(msg);return}
+  if(needConn())return;
+  const btn=$('saveBtn');btn.disabled=true;btn.textContent='Guardando…';setStatus('');
+  try{
+    const plan=cleanPlan(d);plan.actualizado=Date.now();
+    const k=await deriveDni(d.dni);
+    if(S.clients.some(c=>c.id===k.id&&c.id!==d.origId)){
+      setStatus('Ya existe un plan con ese DNI. Ábrelo desde la lista para editarlo.');
+      btn.disabled=false;btn.textContent='Guardar plan';return;
+    }
+    const next=JSON.parse(JSON.stringify(S.admin));
+    next.clientes=next.clientes||{};
+    next.clientes[k.id]={dni:d.dni,plan:plan};
+    if(d.origId&&d.origId!==k.id)delete next.clientes[d.origId];
+    const box=await seal(plan,k.key);
+    await persist(next,p=>{p[k.id]=box;if(d.origId&&d.origId!==k.id)delete p[d.origId]});
+    S.admin=next;refreshClients();S.mode='list';S.draft=null;S.confirmDel=false;
+    flash('Plan guardado. El cliente lo verá en 1 o 2 minutos.');
+  }catch(e){
+    setStatus(ghErr(e));btn.disabled=false;btn.textContent='Guardar plan';
+  }
+}
+async function delClient(){
+  const btn=$('delBtn');
+  if(!S.confirmDel){S.confirmDel=true;btn.textContent='Confirmar: eliminar plan';return}
+  if(needConn())return;
+  btn.disabled=true;
+  try{
+    const id=S.draft.origId;
+    const next=JSON.parse(JSON.stringify(S.admin));
+    delete next.clientes[id];
+    await persist(next,p=>{delete p[id]});
+    S.admin=next;refreshClients();S.mode='list';S.draft=null;S.confirmDel=false;
+    flash('Plan eliminado. Desaparecerá de la página del cliente en 1 o 2 minutos.');
+  }catch(e){btn.disabled=false;setStatus(ghErr(e))}
+}
+async function saveConn(){
+  const repo=($('repoIn').value||'').trim().replace(/^https?:\/\/github\.com\//,'').replace(/\/$/,'');
+  const tok=($('tokIn').value||'').trim();
+  const err=$('cerr');
+  if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){err.textContent='Escribe el repositorio como usuario/nombre.';return}
+  if(!tok){err.textContent='Pega el token de GitHub.';return}
+  err.textContent='Verificando…';
+  try{
+    const r=await fetch('https://api.github.com/repos/'+repo,{headers:{'Authorization':'Bearer '+tok,'Accept':'application/vnd.github+json'}});
+    if(!r.ok){err.textContent='GitHub no aceptó ese token o ese repositorio.';return}
+    const j=await r.json();
+    if(j.permissions&&j.permissions.push===false){err.textContent='Ese token no tiene permiso de escritura en el repositorio.';return}
+  }catch(e){err.textContent='No se pudo conectar con GitHub. Revisa tu conexión.';return}
+  S.token=tok;S.repo=repo;S.connErr='';
+  writeCfg({token:tok,repo:repo});
+  render();
+}
+async function login(){
+  const pw=$('pw').value,err=$('lerr'),btn=$('loginBtn');
+  if(S.first){
+    const pw2=$('pw2').value;
+    if(pw.length<8){err.textContent='Usa al menos 8 caracteres.';return}
+    if(pw!==pw2){err.textContent='Las contraseñas no coinciden.';return}
+  }else if(!pw){err.textContent='Escribe tu contraseña.';return}
+  btn.disabled=true;btn.textContent='Verificando…';err.textContent='';
+  try{
+    if(S.first){
+      S.salt=crypto.getRandomValues(new Uint8Array(16));
+      S.key=await adminKey(pw,S.salt);
+      S.admin={clientes:{}};
+    }else{
+      const salt=fromB64(S.adminBox.salt);
+      const key=await adminKey(pw,salt);
+      const data=await unseal(S.adminBox,key);
+      if(!data){err.textContent='Contraseña incorrecta.';btn.disabled=false;btn.textContent='Entrar';return}
+      S.salt=salt;S.key=key;S.admin=data;
+      if(!S.admin.clientes)S.admin.clientes={};
+    }
+  }catch(e){
+    err.textContent=(window.crypto&&crypto.subtle)?'No se pudo verificar la contraseña.':'Este navegador no puede verificar la contraseña.';
+    btn.disabled=false;btn.textContent='Entrar';return;
+  }
+  S.step='panel';S.mode='list';refreshClients();render();
+}
+function focusLastItem(m){
+  const els=document.querySelectorAll('[data-m="'+m+'"][data-k="alimento"]');
+  if(els.length)els[els.length-1].focus();
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-act]');if(!t)return;
+  const a=t.dataset.act,d=S.draft;
+  if(a==='new'){S.draft=blankDraft();S.mode='edit';S.confirmDel=false;render()}
+  else if(a==='edit'){const c=S.clients.find(x=>x.id===t.dataset.id);if(c){S.draft=draftFrom(c);S.mode='edit';S.confirmDel=false;render()}}
+  else if(a==='back'){S.mode='list';S.draft=null;S.confirmDel=false;render()}
+  else if(a==='add-meal'){d.comidas.push(blankMeal());render();focusLastItem(d.comidas.length-1)}
+  else if(a==='del-meal'){d.comidas.splice(+t.dataset.m,1);if(!d.comidas.length)d.comidas.push(blankMeal());render()}
+  else if(a==='add-item'){const m=+t.dataset.m;d.comidas[m].items.push(blankItem());render();focusLastItem(m)}
+  else if(a==='del-item'){const m=d.comidas[+t.dataset.m];m.items.splice(+t.dataset.i,1);if(!m.items.length)m.items.push(blankItem());render()}
+  else if(a==='save')savePlan();
+  else if(a==='del-client')delClient();
+  else if(a==='save-conn')saveConn();
+  else if(a==='disc-conn'){S.token='';writeCfg({repo:S.repo});render()}
+  else if(a==='exit')location.reload();
+});
+function onField(e){
+  const t=e.target;
+  const k=t.dataset&&t.dataset.k,d=S.draft;
+  if(!k||!d)return;
+  if(t.dataset.i!==undefined)d.comidas[+t.dataset.m].items[+t.dataset.i][k]=t.value;
+  else if(t.dataset.m!==undefined)d.comidas[+t.dataset.m][k==='mnombre'?'nombre':'hora']=t.value;
+  else{
+    if(k==='dni')t.value=t.value.replace(/\D/g,'').slice(0,8);
+    d[k]=t.value;
+    if(k==='p'||k==='c'||k==='g'){const el=$('kcalLive');if(el)el.textContent=kcalOf(d)}
+  }
+}
+document.addEventListener('input',onField);
+document.addEventListener('change',onField);
+document.addEventListener('submit',e=>{
+  if(e.target.id!=='loginForm')return;
+  e.preventDefault();login();
+});
+
+async function loadAdminBox(){
+  S.first=false;S.adminBox=null;S.loadErr='';
+  if(S.token&&S.repo){
+    try{
+      const f=await ghGet('admin.json');
+      if(f){S.adminBox=JSON.parse(f.text);return}
+      S.first=true;return;
+    }catch(e){}
+  }
+  try{
+    const r=await fetch('admin.json?v='+Date.now(),{cache:'no-store'});
+    if(r.ok){S.adminBox=await r.json();return}
+    if(r.status===404){S.first=true;return}
+  }catch(e){}
+  S.loadErr='No se pudo cargar el panel. Revisa tu conexión.';
+}
+(async function init(){
+  render();
+  const cfg=readCfg();
+  S.token=cfg.token||'';
+  S.repo=cfg.repo||detectRepo();
+  await loadAdminBox();
+  S.step='login';render();
+})();
+</script>
+</body>
+</html>
