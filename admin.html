@@ -234,7 +234,7 @@ function ghErr(e){
 }
 
 const blankItem=()=>({alimento:'',cant:'',unidad:'g'});
-const blankMeal=(n,h)=>({nombre:n||'',hora:h||'',items:[blankItem()]});
+const blankMeal=(n,h,dia)=>({nombre:n||'',hora:h||'',dia:dia||'Lunes',items:[blankItem()]});
 const blankDraft=()=>({origId:null,dni:'',nombre:'',objetivo:'',p:'',c:'',g:'',notas:'',comidas:[blankMeal('Desayuno','08:00')]});
 function draftFrom(c){
   const pl=c.plan,f=v=>v?String(v):'';
