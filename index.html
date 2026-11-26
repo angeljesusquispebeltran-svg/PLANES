@@ -147,23 +147,51 @@ function planHTML(p){
   if(p.objetivo)out+='<p class="muted">'+esc(p.objetivo)+'</p>';
   if(p.actualizado)out+='<p class="muted" style="font-size:13px">Actualizado el '+fmtDate(p.actualizado)+'</p>';
   out+='</div>';
+
   if(kc){
     out+='<div class="panel"><div class="kcalrow"><span class="kcal">'+kc+'</span><span class="muted">kcal al día</span></div>'+
-      '<div class="bar" role="img" aria-label="Reparto de calorías entre proteína, carbohidratos y grasas">'+
-      '<span style="width:'+w(cp)+'%;background:var(--prot)"></span>'+
+      '<div class="bar"><span style="width:'+w(cp)+'%;background:var(--prot)"></span>'+
       '<span style="width:'+w(cc)+'%;background:var(--carb)"></span>'+
       '<span style="width:'+w(cg)+'%;background:var(--fat)"></span></div>'+
       '<ul class="legend">'+
-      '<li><i style="background:var(--prot)"></i><span><b>Proteína</b> '+fmtN(p.p)+' g <span class="muted">'+pc(cp)+'%</span></span></li>'+
-      '<li><i style="background:var(--carb)"></i><span><b>Carbohidratos</b> '+fmtN(p.c)+' g <span class="muted">'+pc(cc)+'%</span></span></li>'+
-      '<li><i style="background:var(--fat)"></i><span><b>Grasas</b> '+fmtN(p.g)+' g <span class="muted">'+pc(cg)+'%</span></span></li>'+
+      '<li><i style="background:var(--prot)"></i><span><b>Proteína</b> '+fmtN(p.p)+' g</span></li>'+
+      '<li><i style="background:var(--carb)"></i><span><b>Carbohidratos</b> '+fmtN(p.c)+' g</span></li>'+
+      '<li><i style="background:var(--fat)"></i><span><b>Grasas</b> '+fmtN(p.g)+' g</span></li>'+
       '</ul></div>';
   }
-  (p.comidas||[]).forEach(m=>{
-    out+='<section class="panel mealview"><header><h3>'+esc(m.nombre)+'</h3>'+(m.hora?'<span class="time">'+esc(m.hora)+'</span>':'')+'</header><ul class="rows">'+
-      (m.items||[]).map(i=>'<li><span>'+esc(i.alimento)+'</span><span class="amt">'+fmtN(i.cant)+' '+esc(i.unidad||'g')+'</span></li>').join('')+
-      '</ul></section>';
-  });
+
+  const dias=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const comidas=p.comidas||[];
+  const tieneDias=comidas.some(m=>m.dia);
+
+  if(tieneDias){
+    out+='<div class="panel"><h3>Plan semanal</h3><div class="row2">';
+    dias.forEach(dia=>{
+      const lista=comidas.filter(m=>m.dia===dia);
+      if(!lista.length)return;
+      out+='<section class="panel"><h3>'+dia+'</h3>';
+      lista.forEach(m=>{
+        out+='<div class="mealview"><header><b>'+esc(m.nombre)+'</b>'+
+          (m.hora?'<span class="time">'+esc(m.hora)+'</span>':'')+'</header><ul class="rows">';
+        (m.items||[]).forEach(i=>{
+          out+='<li><span>'+esc(i.alimento)+'</span><span class="amt">'+
+            (i.cant!==''&&i.cant!=null?fmtN(i.cant)+' '+esc(i.unidad||'g'):'Por definir')+
+            '</span></li>';
+        });
+        out+='</ul></div>';
+      });
+      out+='</section>';
+    });
+    out+='</div></div>';
+  }else{
+    comidas.forEach(m=>{
+      out+='<section class="panel mealview"><header><h3>'+esc(m.nombre)+'</h3>'+
+        (m.hora?'<span class="time">'+esc(m.hora)+'</span>':'')+'</header><ul class="rows">'+
+        (m.items||[]).map(i=>'<li><span>'+esc(i.alimento)+'</span><span class="amt">'+fmtN(i.cant)+' '+esc(i.unidad||'g')+'</span></li>').join('')+
+        '</ul></section>';
+    });
+  }
+
   if(p.notas)out+='<div class="panel"><h3>Indicaciones</h3><p class="pre">'+esc(p.notas)+'</p></div>';
   return out;
 }
